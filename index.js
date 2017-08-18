@@ -1322,7 +1322,7 @@
  * @returns {*} the "defineProperty" structure for the property
  * @private
  */
-    ObjectTemplate._getDefineProperty = function getDefineProperty(prop, template)  {
+    ObjectTemplate._getDefineProperty = function getDefineProperty(prop, template, returnValue)  {
         if (template && (template != Object) && template.defineProperties && template.defineProperties[prop]) {
             return template.defineProperties[prop];
         }
@@ -1349,8 +1349,15 @@
 
         if (template.defineProperties) {
             for (var prop in template.defineProperties) {
-                if (includeVirtual || !template.defineProperties[prop].isVirtual) {
+                if (!returnValue[prop] && (includeVirtual || !template.defineProperties[prop].isVirtual)) {
                     returnValue[prop] = template.defineProperties[prop];
+                }
+                else if (returnValue[prop]) {
+                    for (var key in template.defineProperties[prop]) {
+                        if (!returnValue[prop][key]) {
+                            returnValue[prop][key] = template.defineProperties[prop][key];
+                        }
+                    }
                 }
             }
         }
@@ -1807,7 +1814,7 @@
     };
 
 /**
- * This is the base class for typescript classes.  It must
+ * This is the base class for typescript classes.  It    must
  * It will inject members into the object from both the template and objectTemplate
  * @param {ObjectTemplate} - other layers can pass in their own object template (this is the object not ObjectTemplate)
  * @returns {Object} the object itself
